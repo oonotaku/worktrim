@@ -18,17 +18,6 @@ const WORKING_DAYS_PER_MONTH = 20;
 
 // --- 各パラメータの数値変換 ---
 
-function getEmployeeCount(range: EmployeeRange): number {
-  const map: Record<EmployeeRange, number> = {
-    '1-5': 3,
-    '6-10': 8,
-    '11-30': 20,
-    '31-50': 40,
-    '51+': 60,
-  };
-  return map[range];
-}
-
 function getMeetingCount(range: MeetingCount): number {
   const map: Record<MeetingCount, number> = {
     '0-5': 3,
