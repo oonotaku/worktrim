@@ -1,36 +1,77 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# WorkTrim — 業務削減診断ツール
 
-## Getting Started
+中小企業・小規模事業者向けの「業務削減診断MVP」です。
+10問に答えるだけで、削減できる業務時間・コスト・今すぐできる施策が確認できます。
 
-First, run the development server:
+## 起動方法
 
 ```bash
+# 依存パッケージをインストール
+npm install
+
+# 開発サーバーを起動
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+ブラウザで [http://localhost:3000](http://localhost:3000) を開いてください。
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## ページ構成
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| URL | 内容 |
+|-----|------|
+| `/` | LPページ（ヒーロー・ベネフィット・CTA） |
+| `/diagnosis` | 診断フォーム（10問 + メールアドレス） |
+| `/result` | 診断結果（削減時間・内訳・施策・PDF出力） |
 
-## Learn More
+## ダミーデータで結果確認
 
-To learn more about Next.js, take a look at the following resources:
+`/result` に直接アクセスすると、`lib/calculator.ts` の `DUMMY_ANSWERS` をもとに
+サンプルの診断結果が表示されます。
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## ファイル構成
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```
+app/
+  page.tsx              # LPページ
+  diagnosis/page.tsx    # 診断フォームページ
+  result/page.tsx       # 結果ページ
+components/
+  lp/                   # LPセクション（Hero, WhatYouGet, Benefits, WasteExamples, BottomCTA）
+  diagnosis/            # 診断フォーム（QuestionCard, ProgressBar, EmailStep）
+  result/               # 結果表示（SummaryCards, BreakdownTable, ActionItems, ResultCTA, PrintableReport）
+data/
+  questions.ts          # 質問定義（10問）
+lib/
+  calculator.ts         # 削減時間・コストの計算ロジック
+types/
+  index.ts              # 型定義
+```
 
-## Deploy on Vercel
+## 計算ロジック
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+| 項目 | 計算式 |
+|------|--------|
+| 会議時間削減 | 月の会議回数 × 平均時間 × 30% × 参加人数（従業員数の50%） |
+| 報告書作成削減 | 月の報告書作成時間 × 50% × 人数係数 |
+| 手作業集計削減 | 月の集計回数 × 1時間 × 80% |
+| 請求書・見積書削減 | 月の作成件数 × 15分 × 70% |
+| 紙業務削減 | 頻度に応じて月2〜40時間 |
+| 電話対応効率化 | 月の電話件数 × 10分 × 40% |
+| 情報共有改善 | 共有方法 × 人数 × 係数 |
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+コスト換算: 時給3,000円
+
+計算ロジックは `lib/calculator.ts` にまとめられており、係数の調整が容易です。
+
+## PDF出力
+
+結果ページの「PDFで保存」ボタン → ブラウザの印刷機能を使用（A4横サイズ推奨）。
+印刷専用レイアウト（`PrintableReport.tsx`）が表示されます。
+
+## 技術スタック
+
+- **Next.js 14** (App Router)
+- **TypeScript**
+- **Tailwind CSS**
+- データ保存: localStorage（DBなし）
+- PDF: ブラウザ印刷（`window.print()`）
